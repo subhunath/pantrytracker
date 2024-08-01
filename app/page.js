@@ -1,55 +1,45 @@
+'use client'
+import { useState, useEffect } from 'react'
+import { firestore } from '../firebase'
+import { collection, getDocs, query } from 'firebase/firestore'
 import { Box, Stack, Typography } from "@mui/material";
-const items = ['tomato', 'potato', 'onion', 'garlic', 'ginger', 'carrot', 'lettuce', 'kale', 'cucumber']
+
 export default function Home() {
-  return (
-      <Box width="100vw" height="100vh"
-      display={'flex'}
-      justifyContent={'center'}
-      alignItems={'center'}
+  const [inventory, setInventory] = useState([])
+  const [open, setOpen] = useState([false])
+  const [itemName, setItemName] = useState('')
 
-      flexDirection={"column"}
-      >
-        <Box border={'1px solid  #333'}>
-          
-        <Box width="800px" 
-        height="100px" 
-        bgcolor="#ADD8E6" 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center"
-        >
-          <Typography variant="h2" color="#333" fontWeight="bold">
-            Pantry Tracker
+  const updateInventory = async () => {
+    const snapshot = query(collection(firestore, 'inventory'))
+    const docs = await getDocs(snapshot)
+    const inventoryList = []
+    docs.forEach((doc) => {
+      inventoryList.push({
+        name: doc.id,
+        ...doc.data(),
+      })
+    })
+    setInventory(inventoryList)
+    console.log(inventoryList)
+  }
+
+  useEffect(() => {
+    updateInventory()
+  }, [])
+
+  return <Box>
+    <Typography variant="h1">
+      Pantry Tracker
+    </Typography>
+    {inventory.forEach((item) => {
+      return (
+        <>
+          <Typography variant="h2">
+            {item.name}
+            {item.count}
           </Typography>
-        </Box>
-        <Stack width="800px" 
-        height="300px" 
-        spacing={2} 
-        overflow={'auto'} 
-        >
-          {items.map((i) => (
-            <Box 
-            key={i}
-            width="100%"
-            height="300px"
-            display={'flex'}
-            justifyContent={'center'}
-            alignItems={'center'}
-            bgcolor={'#f0f0f0'}>
-            <Typography
-            variant={'h3'}
-            color={'#333'}
-            textAlign={'center'}
-            >
-
-            {
-            i.charAt(0).toUpperCase() + i.slice(1)
-            }
-            </Typography>
-            </Box>
-          ))}
-        </Stack>
-      </Box>
-    </Box>
-  );
+        </>
+      )
+    })}
+  </Box>
 }
