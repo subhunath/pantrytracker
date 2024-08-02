@@ -59,7 +59,11 @@ export default function Home() {
 
   const updateItemQuantity = async (item, newQuantity) => {
     const docRef = doc(collection(firestore, 'inventory'), item);
-    await setDoc(docRef, { quantity: newQuantity });
+    if (newQuantity === 0) {
+      await deleteDoc(docRef);
+    } else {
+      await setDoc(docRef, { quantity: newQuantity });
+    }
     await updateInventory();
   };
 
@@ -76,6 +80,17 @@ export default function Home() {
 
   return (
     <Box width="100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column" p={2}>
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        width="100%"
+        height="100%"
+        zIndex="-1"
+        sx={{
+          background: 'linear-gradient(135deg, #333 0%, #222 100%)',
+        }}
+      />
       <Modal open={open} onClose={handleClose}>
         <Box
           position="absolute"
@@ -123,7 +138,7 @@ export default function Home() {
         Add New Item
       </Button>
 
-      <Box border="1px solid #333" width={isMobile ? '100%' : '80%'} p={2} borderRadius={2} boxShadow={3} display="flex" flexDirection="column" height="80vh">
+      <Box border="1px solid #333" width={isMobile ? '100%' : '80%'} p={2} borderRadius={2} boxShadow={3} display="flex" flexDirection="column" height="80vh" bgcolor="white">
         <Box
           width="100%"
           bgcolor="#ADDBE6"
@@ -161,7 +176,7 @@ export default function Home() {
                   </CardContent>
                   <CardActions>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Button variant="contained" onClick={() => { removeItem(name) }}>
+                      <Button variant="contained" onClick={() => { removeItem(name) }} sx={{ backgroundColor: 'red', '&:hover': { backgroundColor: 'darkred' } }}>
                         -
                       </Button>
                       <TextField
@@ -175,7 +190,7 @@ export default function Home() {
                         }}
                         inputProps={{ min: 0 }}
                       />
-                      <Button variant="contained" onClick={() => { addItem(name) }}>
+                      <Button variant="contained" onClick={() => { addItem(name) }} sx={{ backgroundColor: '#7CFC00', '&:hover': { backgroundColor: 'green' } }}>
                         +
                       </Button>
                     </Stack>
